@@ -1,5 +1,10 @@
 package ytapi
 
+import (
+	"net/url"
+	"strings"
+)
+
 func (c *channelInfoYTInitialData) GetLinks() (res []channelInfoLink) {
 	for _, l := range c.Header.Renderer.HeaderLinks.Renderer.PrimaryLinks {
 		res = append(res, l)
@@ -8,6 +13,16 @@ func (c *channelInfoYTInitialData) GetLinks() (res []channelInfoLink) {
 		res = append(res, l)
 	}
 	return
+}
+
+func (l *channelInfoLink) Extract() string {
+	u := l.NavigationEndpoint.UrlEndpoint.URL
+	idx := strings.Index(u, "&q=")
+	if idx < 0 {
+		return ""
+	}
+	s, _ := url.QueryUnescape(u[idx+3:])
+	return s
 }
 
 type channelInfoLink struct {

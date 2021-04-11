@@ -16,6 +16,6 @@ func main() {
 	log.Println("Description:", meta.Description)
 	log.Println("Links:")
 	for _, l := range data.GetLinks() {
-		log.Println(" *", l.Title.Simpletext, ":", l.NavigationEndpoint.UrlEndpoint.URL)
+		log.Println(" *", l.Title.Simpletext, ":", l.Extract())
 	}
 }
