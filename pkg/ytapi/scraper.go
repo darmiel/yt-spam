@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/darmiel/yt-spam/pkg/ytresp"
 	"github.com/imroc/req"
 	"strings"
 )
 
-func ScrapeChannelInfo(id ChannelID) (res *channelInfoYTInitialData, err error) {
+func ScrapeChannelInfo(id ChannelID) (res *ytresp.ChannelInfoYTInitialData, err error) {
 	var resp *req.Resp
 	if resp, err = req.Get(id.GetChannelURL()); err != nil {
 		return
@@ -29,7 +30,7 @@ func ScrapeChannelInfo(id ChannelID) (res *channelInfoYTInitialData, err error) 
 		text = strings.TrimSpace(text[strings.Index(text, "=")+1:])
 		text = text[:len(text)-1]
 		// try to parse data
-		res = new(channelInfoYTInitialData)
+		res = new(ytresp.ChannelInfoYTInitialData)
 		err = json.Unmarshal([]byte(text), res)
 	})
 	if found == 0 {

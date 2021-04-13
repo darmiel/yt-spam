@@ -1,11 +1,11 @@
-package ytapi
+package ytresp
 
 import (
 	"net/url"
 	"strings"
 )
 
-func (c *channelInfoYTInitialData) GetLinks() (res []channelInfoLink) {
+func (c *ChannelInfoYTInitialData) GetLinks() (res []channelInfoLink) {
 	for _, l := range c.Header.Renderer.HeaderLinks.Renderer.PrimaryLinks {
 		res = append(res, l)
 	}
@@ -50,7 +50,7 @@ type channelInfoLink struct {
 		Simpletext string `json:"simpleText"`
 	} `json:"title"`
 }
-type channelInfoYTInitialData struct {
+type ChannelInfoYTInitialData struct {
 	Contents struct {
 		Renderer struct {
 			Tabs []struct {
@@ -77,7 +77,33 @@ type channelInfoYTInitialData struct {
 											Description struct {
 												SimpleText string `json:"simpleText"`
 											} `json:"description"`
-											ViewCountText struct {
+											PrimaryLinks []struct {
+												NavigationEndpoint struct {
+													ClickTrackingParams string `json:"clickTrackingParams"`
+													CommandMetadata     struct {
+														WebCommandMetadata struct {
+															URL         string `json:"url"`
+															WebpageType string `json:"webPageType"`
+															RootVe      int    `json:"rootVe"`
+														} `json:"webCommandMetadata"`
+													} `json:"commandMetadata"`
+													UrlEndpoint struct {
+														URL      string `json:"url"`
+														Target   string `json:"target"`
+														Nofollow bool   `json:"nofollow"`
+													} `json:"urlEndpoint"`
+												} `json:"navigationEndpoint"`
+												Icon struct {
+													Thumbnails []struct {
+														URL string `json:"url"`
+													} `json:"thumbnails"`
+												} `json:"icon"`
+												Title struct {
+													SimpleText string `json:"simpleText"`
+												} `json:"title"`
+												TrackingParams string `json:"trackingParams"`
+											} `json:"primaryLinks"`
+											ViewcountText struct {
 												SimpleText string `json:"simpleText"`
 											} `json:"viewCountText"`
 											JoinedDateText struct {
@@ -85,6 +111,60 @@ type channelInfoYTInitialData struct {
 													Text string `json:"text"`
 												} `json:"runs"`
 											} `json:"joinedDateText"`
+											CanonicalChannelURL        string `json:"canonicalChannelUrl"`
+											BypassBusinessEmailCaptcha bool   `json:"bypassBusinessEmailCaptcha"`
+											Title                      struct {
+												SimpleText string `json:"simpleText"`
+											} `json:"title"`
+											Avatar struct {
+												Thumbnails []struct {
+													URL    string `json:"url"`
+													Width  int    `json:"width"`
+													Height int    `json:"height"`
+												} `json:"thumbnails"`
+											} `json:"avatar"`
+											Country struct {
+												SimpleText string `json:"simpleText"`
+											} `json:"country"`
+											ShowDescription  bool `json:"showDescription"`
+											DescriptionLabel struct {
+												Runs []struct {
+													Text string `json:"text"`
+												} `json:"runs"`
+											} `json:"descriptionLabel"`
+											DetailsLabel struct {
+												Runs []struct {
+													Text string `json:"text"`
+												} `json:"runs"`
+											} `json:"detailsLabel"`
+											PrimaryLinksLabel struct {
+												Runs []struct {
+													Text string `json:"text"`
+												} `json:"runs"`
+											} `json:"primaryLinksLabel"`
+											StatsLabel struct {
+												Runs []struct {
+													Text string `json:"text"`
+												} `json:"runs"`
+											} `json:"statsLabel"`
+											CountryLabel struct {
+												Runs []struct {
+													Text        string `json:"text"`
+													Deemphasize bool   `json:"deemphasize"`
+												} `json:"runs"`
+											} `json:"countryLabel"`
+											ChannelID                         string `json:"channelId"`
+											OnBusinessEmailRevealClickCommand struct {
+												ClickTrackingParams string `json:"clickTrackingParams"`
+												CommandMetadata     struct {
+													WebCommandMetadata struct {
+														SendPost bool   `json:"sendPost"`
+														ApiURL   string `json:"apiUrl"`
+													} `json:"webCommandMetadata"`
+												} `json:"commandMetadata"`
+												RevealBusinessEmailCommand struct {
+												} `json:"revealBusinessEmailCommand"`
+											} `json:"onBusinessEmailRevealClickCommand"`
 										} `json:"channelAboutFullMetadataRenderer"`
 									} `json:"contents"`
 									TrackingParams string `json:"trackingParams"`
