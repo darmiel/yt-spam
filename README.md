@@ -7,8 +7,10 @@ There are currently the following checks:
 ## Copy-Cat
 Checks (long) comments for duplicates
 
-** Example result:**
+**Example result:**
+
 ![Preview (Small)](https://user-images.githubusercontent.com/71837281/115027025-77c2d280-9ec3-11eb-9bd6-1f9ca47187ea.gif)
+
 ```
 🐈 COPY-CAT Shakina Eprillia copied Wendy Williams w/ why am i watching this? + UgyXwt3AMowF3cD1B5h4AaABAg , - Ugx3fOsQdPHLQFV9dDJ4AaABAg ]
 🐈 COPY-CAT Shyamlee singh copied Ray w/ Please be my math teacher + Ugw9JPlsDQfqZ_lRS4B4AaABAg , - Ugx58npioj9isYLYzdp4AaABAg ]
