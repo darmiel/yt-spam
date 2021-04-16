@@ -3,7 +3,6 @@ package ytspam
 import (
 	"encoding/base64"
 	"google.golang.org/api/youtube/v3"
-	"log"
 	"strconv"
 	"time"
 )
@@ -52,8 +51,8 @@ func (c *CommentChecker) addViolation(comment *youtube.Comment, check Check, rat
 		rating: rating,
 		check:  check,
 	})
-	log.Println("Added Violation for Check", check.Name(),
-		"to [", comment.Snippet.AuthorDisplayName, "] with rating", rating)
+	//log.Println("Added Violation for Check", check.Name(),
+	//	"to [", comment.Snippet.AuthorDisplayName, "] with rating", rating)
 }
 
 func (c *CommentChecker) Check(checks ...CommentCheck) error {

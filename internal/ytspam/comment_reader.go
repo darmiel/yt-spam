@@ -70,7 +70,9 @@ func (r *CommentReader) readVideoComments(npt ...string) error {
 	}
 
 	// TODO: remove debug
-	log.Println("Read", len(r.comments), "comments...")
+	if resp.PageInfo != nil {
+		log.Println("Read", len(r.comments), "+", resp.PageInfo.TotalResults, "comments...")
+	}
 
 	if resp.NextPageToken != "" {
 		return r.readVideoComments(resp.NextPageToken)

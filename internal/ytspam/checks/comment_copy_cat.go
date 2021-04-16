@@ -49,12 +49,12 @@ func printCCMessage(oc, ccc *youtube.Comment) {
 	oa := oc.Snippet.AuthorDisplayName
 	cc := ccc.Snippet.AuthorDisplayName
 	fmt.Println(ccPrefix(),
-		termenv.String(oa).Foreground(p().Color("#A8CC8C")),
-		"was copy-cat-ed by",
 		termenv.String(cc).Foreground(p().Color("#E88388")),
-		"with message",
+		"copied",
+		termenv.String(oa).Foreground(p().Color("#A8CC8C")),
+		"w/",
 		termenv.String(b).Foreground(p().Color("#66C2CD")),
-		"[orig.:", oc.Id, " | copy-cat-ed:", ccc.Id, "]")
+		"+", oc.Id, ", -", ccc.Id, "]")
 }
 
 func (c *CommentCopyCatCheck) CheckComment(comment *youtube.Comment) error {
