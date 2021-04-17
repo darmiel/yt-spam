@@ -24,7 +24,6 @@ func main() {
 	}
 
 	apiKey := string(b)
-	log.Println("Read API-Key:", apiKey)
 
 	service, err := youtube.NewService(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
