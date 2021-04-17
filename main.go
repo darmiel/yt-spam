@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/darmiel/yt-spam/internal/checks/copycat"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"golang.org/x/net/context"
@@ -33,8 +32,7 @@ func main() {
 		return
 	}
 
-	call := service.Videos.List([]string{"snippet"}).
-		Id(videoId)
+	call := service.Videos.List([]string{"snippet", "statistics"}).Id(videoId)
 	resp, err := call.Do()
 	if err != nil {
 		log.Fatalln("ERROR:", err)
@@ -54,13 +52,18 @@ func main() {
 		termenv.String(video.Snippet.PublishedAt).Foreground(p.Color("#D290E4")),
 		")")
 
-	reader := ytspam.NewCommentReader(service, videoId)
+	reader := ytspam.NewCommentReader(service, video, &ytspam.CommentReaderConfig{
+		DisplayBar: true,
+		Silent:     false,
+	})
 	if err := reader.Read(); err != nil {
 		log.Println("WARN ::", err)
 	}
 
-	checker := ytspam.NewCommentChecker(reader.GetComments())
-	if err := checker.Check(&copycat.CommentCopyCatCheck{}); err != nil {
-		log.Println("WARN ::", err)
-	}
+	/*
+		checker := ytspam.NewCommentChecker(reader.GetComments())
+		if err := checker.Check(&copycat.CommentCopyCatCheck{}); err != nil {
+			log.Println("WARN ::", err)
+		}
+	*/
 }

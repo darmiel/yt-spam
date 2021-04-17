@@ -1,20 +1,41 @@
 package ytspam
 
 import (
+	"github.com/cheggaaa/pb/v3"
 	"google.golang.org/api/youtube/v3"
 	"log"
 )
 
-type CommentReader struct {
-	VideoID  string
-	comments map[string]*youtube.Comment
-	service  *youtube.Service
+type CommentReaderConfig struct {
+	DisplayBar bool
+	Silent     bool
 }
 
-func NewCommentReader(service *youtube.Service, videoID string) *CommentReader {
+type CommentReader struct {
+	service  *youtube.Service
+	video    *youtube.Video
+	comments map[string]*youtube.Comment
+	stats    *CommentReaderStats
+	bar      *pb.ProgressBar
+	*CommentReaderConfig
+}
+
+type CommentReaderStats struct {
+	ReadComments int64
+	ReadReplies  int64
+}
+
+func NewCommentReader(service *youtube.Service, video *youtube.Video, config ...*CommentReaderConfig) *CommentReader {
+	var cfg *CommentReaderConfig
+	if len(config) > 0 {
+		cfg = config[0]
+	} else {
+		cfg = &CommentReaderConfig{}
+	}
 	return &CommentReader{
-		VideoID: videoID,
-		service: service,
+		service:             service,
+		video:               video,
+		CommentReaderConfig: cfg,
 	}
 }
 
@@ -39,10 +60,35 @@ func (r *CommentReader) GetComments() map[string]*youtube.Comment {
 	return r.comments
 }
 
+func (r *CommentReader) readCommentReplies(comment *youtube.Comment, token ...string) error {
+	if r.stats == nil {
+		r.stats = &CommentReaderStats{}
+	}
+	call := r.service.Comments.List([]string{"id", "snippet"}).ParentId(comment.Id)
+	if len(token) > 0 {
+		call = call.PageToken(token[0])
+	}
+	resp, err := call.Do()
+	if err != nil {
+		return err
+	}
+	r.stats.ReadReplies += int64(len(resp.Items))
+	for _, re := range resp.Items {
+		r.addComment(re)
+	}
+	if resp.NextPageToken != "" {
+		return r.readCommentReplies(comment, resp.NextPageToken)
+	}
+	return nil
+}
+
 func (r *CommentReader) readVideoComments(npt ...string) error {
+	if r.stats == nil {
+		r.stats = &CommentReaderStats{}
+	}
 	call := r.service.CommentThreads.List([]string{"id", "replies", "snippet"}).
 		// Filters
-		VideoId(r.VideoID).
+		VideoId(r.video.Id).
 		// Parameters
 		MaxResults(100).
 		Order("time")
@@ -56,22 +102,36 @@ func (r *CommentReader) readVideoComments(npt ...string) error {
 		return err
 	}
 
+	r.stats.ReadComments += int64(len(resp.Items))
 	for _, t := range resp.Items {
 		comment := t.Snippet.TopLevelComment
-
-		// check tlc
 		r.addComment(comment)
+
 		// check replies
 		if t.Replies != nil {
-			for _, reply := range t.Replies.Comments {
-				r.addComment(reply)
+			repl := t.Replies.Comments
+			if int64(len(t.Replies.Comments)) < t.Snippet.TotalReplyCount {
+				if err = r.readCommentReplies(comment); err != nil {
+					return err
+				}
+			} else {
+				r.stats.ReadReplies += int64(len(repl))
+				for _, reply := range repl {
+					r.addComment(reply)
+				}
 			}
 		}
 	}
 
-	// TODO: remove debug
-	if resp.PageInfo != nil {
-		log.Println("Read", len(r.comments), "+", resp.PageInfo.TotalResults, "comments...")
+	if r.DisplayBar {
+		if r.bar == nil {
+			r.bar = pb.Full.Start64(int64(r.video.Statistics.CommentCount))
+		}
+		r.bar.SetCurrent(int64(len(r.comments)))
+	} else if !r.Silent {
+		log.Println("Read", r.stats.ReadComments, "comments +",
+			r.stats.ReadReplies, "replies =", r.stats.ReadReplies+r.stats.ReadComments,
+			"(", len(r.comments), ")")
 	}
 
 	if resp.NextPageToken != "" {
@@ -84,5 +144,11 @@ func (r *CommentReader) readVideoComments(npt ...string) error {
 func (r *CommentReader) Read() error {
 	// clear old comments
 	r.comments = make(map[string]*youtube.Comment)
+	defer func() {
+		if r.bar != nil {
+			r.bar.Finish()
+			log.Println("finished bar.")
+		}
+	}()
 	return r.readVideoComments()
 }

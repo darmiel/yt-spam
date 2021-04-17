@@ -3,6 +3,7 @@ module github.com/darmiel/yt-spam
 go 1.16
 
 require (
+	github.com/cheggaaa/pb/v3 v3.0.8 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/muesli/termenv v0.8.1 // indirect
 	golang.org/x/net v0.0.0-20210414194228-064579744ee0
