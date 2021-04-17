@@ -2,20 +2,16 @@ package ytspam
 
 import (
 	"encoding/base64"
+	"github.com/darmiel/yt-spam/internal/checks"
 	"google.golang.org/api/youtube/v3"
 	"strconv"
 	"time"
 )
 
-type Violation struct {
-	rating Rating
-	check  Check
-}
-
 type CommentChecker struct {
 	id         string
 	comments   map[string]*youtube.Comment
-	violations map[string][]*Violation
+	violations map[string][]*checks.Violation
 }
 
 // CurrentTime << 4 | Worker
@@ -34,38 +30,34 @@ func NewCommentChecker(comments map[string]*youtube.Comment) *CommentChecker {
 	return &CommentChecker{
 		id:         evID,
 		comments:   comments,
-		violations: make(map[string][]*Violation),
+		violations: make(map[string][]*checks.Violation),
 	}
 }
 
-func (c *CommentChecker) addViolation(comment *youtube.Comment, check Check, rating Rating) {
+func (c *CommentChecker) addViolation(comment *youtube.Comment, check checks.Check, rating checks.Rating) {
 	if c.violations == nil {
-		c.violations = make(map[string][]*Violation)
+		c.violations = make(map[string][]*checks.Violation)
 	}
 	authorID := comment.Snippet.AuthorChannelId.Value
 	violations, ok := c.violations[authorID]
 	if !ok {
-		violations = make([]*Violation, 0)
+		violations = make([]*checks.Violation, 0)
 	}
-	violations = append(violations, &Violation{
-		rating: rating,
-		check:  check,
+	violations = append(violations, &checks.Violation{
+		Rating: rating,
+		Check:  check,
 	})
-	//log.Println("Added Violation for Check", check.Name(),
-	//	"to [", comment.Snippet.AuthorDisplayName, "] with rating", rating)
 }
 
-func (c *CommentChecker) Check(checks ...CommentCheck) error {
+func (c *CommentChecker) Check(checks ...checks.CommentCheck) error {
 	// clean checks
 	for _, check := range checks {
 		check.Clean()
 	}
 
-	for _, comment := range c.comments {
-		for _, check := range checks {
-			if err := check.CheckComment(comment); err != nil {
-				return err
-			}
+	for _, check := range checks {
+		if err := check.CheckComments(c.comments); err != nil {
+			return err
 		}
 	}
 

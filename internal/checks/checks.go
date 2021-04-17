@@ -1,4 +1,4 @@
-package ytspam
+package checks
 
 import (
 	"google.golang.org/api/youtube/v3"
@@ -20,7 +20,7 @@ type CommentCheck interface {
 	Name() string
 	Finalize() map[*youtube.Comment]Rating
 	Clean()
-	CheckComment(comment *youtube.Comment) error
+	CheckComments(all map[string]*youtube.Comment) error
 }
 
 type ChannelCheck interface {

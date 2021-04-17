@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/darmiel/yt-spam/internal/checks/copycat"
 	"github.com/darmiel/yt-spam/internal/ytspam"
-	"github.com/darmiel/yt-spam/internal/ytspam/checks"
 	"github.com/muesli/termenv"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-const videoId string = "OkmNXy7er84"
+const videoId string = "SacqnEO770E"
 
 func main() {
 	ctx := context.Background()
@@ -60,7 +60,7 @@ func main() {
 	}
 
 	checker := ytspam.NewCommentChecker(reader.GetComments())
-	if err := checker.Check(&checks.CommentCopyCatCheck{}); err != nil {
+	if err := checker.Check(&copycat.CommentCopyCatCheck{}); err != nil {
 		log.Println("WARN ::", err)
 	}
 }
