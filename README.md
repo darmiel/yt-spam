@@ -7,9 +7,8 @@ There are currently the following checks:
 ## Copy-Cat
 Checks (long) comments for duplicates
 
-**Example result:**
+https://user-images.githubusercontent.com/71837281/115129156-ba7bcc00-9fe3-11eb-961c-ebef3928906c.mov
 
-![Preview (Small)](https://user-images.githubusercontent.com/71837281/115027025-77c2d280-9ec3-11eb-9bd6-1f9ca47187ea.gif)
 
 ```
 🐈 COPY-CAT Shakina Eprillia copied Wendy Williams w/ why am i watching this? + UgyXwt3AMowF3cD1B5h4AaABAg , - Ugx3fOsQdPHLQFV9dDJ4AaABAg ]
