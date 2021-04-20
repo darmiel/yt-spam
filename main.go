@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/darmiel/yt-spam/internal/checks/copycat"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"golang.org/x/net/context"
@@ -59,10 +60,8 @@ func main() {
 		log.Println("WARN ::", err)
 	}
 
-	/*
-		checker := ytspam.NewCommentChecker(reader.GetComments())
-		if err := checker.Check(&copycat.CommentCopyCatCheck{}); err != nil {
-			log.Println("WARN ::", err)
-		}
-	*/
+	checker := ytspam.NewCommentChecker(reader.GetComments())
+	if err := checker.Check(&copycat.CommentCopyCatCheck{}); err != nil {
+		log.Println("WARN ::", err)
+	}
 }
