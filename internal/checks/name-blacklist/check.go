@@ -46,16 +46,21 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 			continue
 		}
 		authorName := comment.Snippet.AuthorDisplayName
+		authorNameNorm := authorName
 		if compare.ContainsHomoglyphs(authorName) {
 			log.Println("WARN ::", authorName, "has homoglyphs! Normalizing...")
-			authorName = compare.Normalize(authorName)
-			log.Println("  ::", authorName)
+			authorNameNorm = compare.Normalize(authorName)
+			log.Println("  ::", authorNameNorm)
 		}
 
 		authorNameLc := strings.ToLower(authorName)
 
 		for _, b := range c.blacklist {
-			if b.Compare(authorNameLc) {
+			normCmp := false
+			if authorName != authorNameNorm {
+				normCmp = b.Compare(authorNameNorm)
+			}
+			if b.Compare(authorNameLc) || normCmp {
 				old, ok := c.violations[comment]
 				if !ok {
 					old = 0
