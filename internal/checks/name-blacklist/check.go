@@ -7,6 +7,7 @@ import (
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
+	"log"
 	"path"
 	"strings"
 )
@@ -45,7 +46,14 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 			continue
 		}
 		authorName := comment.Snippet.AuthorDisplayName
+		if compare.ContainsHomoglyphs(authorName) {
+			log.Println("WARN ::", authorName, "has homoglyphs! Normalizing...")
+			authorName = compare.Normalize(authorName)
+			log.Println("  ::", authorName)
+		}
+
 		authorNameLc := strings.ToLower(authorName)
+
 		for _, b := range c.blacklist {
 			if b.Compare(authorNameLc) {
 				old, ok := c.violations[comment]
