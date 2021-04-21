@@ -5,7 +5,6 @@ import (
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
-	"time"
 )
 
 var p termenv.Profile
@@ -23,22 +22,13 @@ func (c *CommentCopyCatCheck) Name() string {
 	return "Copy Cat"
 }
 
-func (c *CommentCopyCatCheck) Clean() {
+func (c *CommentCopyCatCheck) Clean() error {
 	c.violations = make(map[*youtube.Comment]checks.Rating)
+	return nil
 }
 
 func (c *CommentCopyCatCheck) Finalize() map[*youtube.Comment]checks.Rating {
 	return c.violations
-}
-
-// wrappedCopyCatComment -> wrapped *youtube.Comment
-type wrappedCopyCatComment struct {
-	ID         string
-	AuthorID   string
-	AuthorName string
-	Body       string
-	Time       time.Time
-	Original   *youtube.Comment
 }
 
 func ccPrefix() termenv.Style {

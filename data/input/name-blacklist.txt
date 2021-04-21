@@ -1,6 +1,14 @@
+# ----------------------------------
+# Lines starting and ending with '/'
+# are compiled to regexp
+# ----------------------------------
+
 # Known Names
-Rita
-Mellon
+/(?i)\bRita\b/
+/(?i)\bMellon\b/
+
+# just for testing purposes
+# /(?i)\bpaul\b/
 
 # Known phrases
 F*CK ME

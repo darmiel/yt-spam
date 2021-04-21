@@ -13,19 +13,19 @@ func (r *Rating) IsViolation() bool {
 type Check interface {
 	Name() string
 	Finalize() map[*youtube.Comment]Rating
-	Clean()
+	Clean() error
 }
 
 type CommentCheck interface {
 	Name() string
 	Finalize() map[*youtube.Comment]Rating
-	Clean()
+	Clean() error
 	CheckComments(all map[string]*youtube.Comment) error
 }
 
 type ChannelCheck interface {
 	Name() string
 	Finalize() map[*youtube.Comment]Rating
-	Clean()
+	Clean() error
 	CheckChannel(channel *youtube.Channel) error
 }

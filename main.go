@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/darmiel/yt-spam/internal/checks/copycat"
+	name_blacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"golang.org/x/net/context"
@@ -61,7 +61,13 @@ func main() {
 	}
 
 	checker := ytspam.NewCommentChecker(reader.GetComments())
-	if err := checker.Check(&copycat.CommentCopyCatCheck{}); err != nil {
-		log.Println("WARN ::", err)
+	if err := checker.Check(
+		// &copycat.CommentCopyCatCheck{},
+		&name_blacklist.NameBlacklistCheck{}); err != nil {
+		log.Fatalln("WARN ::", err)
+		return
 	}
+	// for i, v := range checker.Violations() {
+	//
+	//}
 }

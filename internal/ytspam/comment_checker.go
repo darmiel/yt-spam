@@ -14,6 +14,10 @@ type CommentChecker struct {
 	violations map[string][]*checks.Violation
 }
 
+func (c *CommentChecker) Violations() map[string][]*checks.Violation {
+	return c.violations
+}
+
 // CurrentTime << 4 | Worker
 var evNum int64
 
@@ -52,7 +56,9 @@ func (c *CommentChecker) addViolation(comment *youtube.Comment, check checks.Che
 func (c *CommentChecker) Check(checks ...checks.CommentCheck) error {
 	// clean checks
 	for _, check := range checks {
-		check.Clean()
+		if err := check.Clean(); err != nil {
+			return err
+		}
 	}
 
 	for _, check := range checks {
