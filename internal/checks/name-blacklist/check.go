@@ -7,7 +7,6 @@ import (
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
-	"io/ioutil"
 	"path"
 	"strings"
 )
@@ -24,35 +23,10 @@ func (c *NameBlacklistCheck) Name() string {
 func (c *NameBlacklistCheck) Clean() error {
 	c.violations = make(map[*youtube.Comment]checks.Rating)
 	// read blacklist
-	c.blacklist = make([]compare.StringCompare, 0)
+	var err error
 	pa := path.Join("data", "input", "name-blacklist.txt")
-	data, err := ioutil.ReadFile(pa)
-	if err != nil {
+	if c.blacklist, err = compare.FromFile(pa); err != nil {
 		return err
-	}
-	for _, line := range strings.Split(string(data), "\n") {
-		w := strings.TrimSpace(strings.ToLower(line))
-		if len(w) <= 0 || strings.HasPrefix(w, "#") {
-			continue
-		}
-
-		var cmp compare.StringCompare
-
-		// regex
-		if compare.HasPrefixSuffix(w, "/") {
-			fmt.Println(nbPrefix(), "using", w, "as regex")
-			cmp = compare.NewStringRegexCompare(w)
-		} else {
-			cmp = compare.NewStringLowerCompare(w)
-		}
-
-		if cmp == nil {
-			fmt.Println(nbPrefix(), "skipping", w)
-			continue
-		}
-
-		c.blacklist = append(c.blacklist, cmp)
-		fmt.Println(nbPrefix(), "read word", termenv.String(w).Foreground(p.Color("#E88388")))
 	}
 	return nil
 }
@@ -62,7 +36,6 @@ func (c *NameBlacklistCheck) Finalize() map[*youtube.Comment]checks.Rating {
 }
 
 func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) error {
-	fmt.Println()
 	bar := pb.New(len(all))
 	checked := make(map[string]bool)
 	for _, comment := range all {
@@ -90,6 +63,5 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 		}
 	}
 	bar.Finish()
-	fmt.Println()
 	return nil
 }

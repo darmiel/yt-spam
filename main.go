@@ -10,6 +10,8 @@ import (
 	"google.golang.org/api/youtube/v3"
 	"io/ioutil"
 	"log"
+	"os"
+	"path"
 )
 
 const videoId string = "SacqnEO770E"
@@ -56,8 +58,38 @@ func main() {
 		DisplayBar: true,
 		Silent:     false,
 	})
-	if err := reader.Read(); err != nil {
-		log.Println("WARN ::", err)
+
+	// TODO: CACHE ONLY FOR TESTING PURPOSES.
+	cp := path.Join("data", "cache", videoId+".json")
+	if _, err := os.Stat(cp); os.IsNotExist(err) {
+		log.Println("READ :: From YouTube")
+		// not cache
+		if err := reader.Read(); err != nil {
+			log.Fatalln("WARN ::", err)
+			return
+		}
+		b, err := reader.ToJSON()
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+		log.Println("READ :: Saving To Cache")
+		if err = ioutil.WriteFile(cp, b, 0777); err != nil {
+			log.Fatalln(err)
+			return
+		}
+	} else {
+		log.Println("READ :: From Cache")
+		// from cache
+		b, err := ioutil.ReadFile(cp)
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+		if err = reader.FromJSON(b); err != nil {
+			log.Fatalln(err)
+			return
+		}
 	}
 
 	checker := ytspam.NewCommentChecker(reader.GetComments())
@@ -67,7 +99,4 @@ func main() {
 		log.Fatalln("WARN ::", err)
 		return
 	}
-	// for i, v := range checker.Violations() {
-	//
-	//}
 }
