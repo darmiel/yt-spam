@@ -51,6 +51,7 @@ func (c *CommentChecker) addViolation(comment *youtube.Comment, check checks.Che
 		Rating: rating,
 		Check:  check,
 	})
+	c.violations[authorID] = violations
 }
 
 func (c *CommentChecker) Check(checks ...checks.CommentCheck) error {

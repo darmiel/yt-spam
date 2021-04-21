@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	name_blacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
+	"github.com/darmiel/yt-spam/internal/checks"
+	nameblacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"golang.org/x/net/context"
@@ -95,8 +96,26 @@ func main() {
 	checker := ytspam.NewCommentChecker(reader.GetComments())
 	if err := checker.Check(
 		// &copycat.CommentCopyCatCheck{},
-		&name_blacklist.NameBlacklistCheck{}); err != nil {
+		&nameblacklist.NameBlacklistCheck{}); err != nil {
 		log.Fatalln("WARN ::", err)
 		return
+	}
+
+	fmt.Println()
+	log.Println("Found:")
+	for id, violations := range checker.Violations() {
+		log.Println("*", "https://www.youtube.com/channel/"+id, ":")
+		ratings := make(map[string]checks.Rating)
+		for _, vl := range violations {
+			r, ok := ratings[vl.Check.Name()]
+			if !ok {
+				r = 0
+			}
+			r += vl.Rating
+			ratings[vl.Check.Name()] = r
+		}
+		for cn, cr := range ratings {
+			log.Println("  ├", cn, "::", cr, "(", cr.IsViolation(), ")")
+		}
 	}
 }
