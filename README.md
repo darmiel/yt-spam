@@ -21,3 +21,7 @@ https://user-images.githubusercontent.com/71837281/115129156-ba7bcc00-9fe3-11eb-
 🐈 COPY-CAT Max copied Jonathan Avila w/ Depends on size of center + UgwxAns6hggoo2EcIad4AaABAg , - UgzOVERaBXIEoNu_5w94AaABAg ]
 🐈 COPY-CAT AruBoii copied Dizzy w/ Dawg why did the YouTube algorit... + UgyvFa0AdB8_F5zhSbR4AaABAg , - UgyXPpdtOXZe81Vprd54AaABAg ]
 ```
+
+## Name-Blacklist
+Checks names for blacklisted words (`data/input/name-blacklist.txt`)
+![Screenshot 2021-04-21 at 16 51 51](https://user-images.githubusercontent.com/71837281/115574446-eb991c80-a2c1-11eb-96cb-8580e306fcf3.png)
