@@ -1,3 +1,7 @@
 /(?i)i\s+hack(ed)(.*)girlfriends?\s*Insta?/
 
 "search for it on google if you wanna try it yourself"
+
+
+# known scams
+"AFFENYTA"
