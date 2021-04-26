@@ -3,11 +3,11 @@ Small tool that tries to detect bots in comments.
 
 ## Checks
 There are currently the following checks:
-* [🔁 Format-Spam](#format-spam)
-* [🐈 Copy-Cat](#copy-cat)
-* ✍️ Blacklist
-    * [✍️ Name-Blacklist](#name-blacklist)
-    * [✍️ Body-Blacklist](#comment-blacklist)
+* [🔁  Format-Spam](#format-spam)
+* [🐈  Copy-Cat](#copy-cat)
+* ✍️  Blacklist
+    * [✍️  Name-Blacklist](#name-blacklist)
+    * [✍️  Body-Blacklist](#comment-blacklist)
 
 ### Format-Spam
 Searches for recurring formatted words; example:
