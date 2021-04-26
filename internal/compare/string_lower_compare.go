@@ -1,11 +1,13 @@
 package compare
 
-import "strings"
+import (
+	"strings"
+)
 
 func NewStringLowerCompare(needle string) *StringLowerCompare {
 	orig := needle
 	needle = strings.TrimSpace(strings.ToLower(needle))
-	if HasPrefixSuffix(needle, `""`) {
+	if HasPrefixSuffix(needle, `"`) {
 		needle = needle[1 : len(needle)-1]
 	}
 	return &StringLowerCompare{

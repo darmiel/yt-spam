@@ -10,51 +10,46 @@ import (
 	"path"
 )
 
-type NameBlacklistCheck struct {
+type CommentBlacklistCheck struct {
 	violations map[*youtube.Comment]checks.Rating
 	blacklist  []compare.StringCompare
 }
 
-func (c *NameBlacklistCheck) Name() string {
-	return "Name-Blacklist"
+func (c *CommentBlacklistCheck) Name() string {
+	return "Comment-Blacklist"
 }
 
-func (c *NameBlacklistCheck) Clean() error {
+func (c *CommentBlacklistCheck) Clean() error {
 	c.violations = make(map[*youtube.Comment]checks.Rating)
 	// read blacklist
 	var err error
-	pa := path.Join("data", "input", "name-blacklist.txt")
+	pa := path.Join("data", "input", "comment-blacklist.txt")
 	if c.blacklist, err = compare.FromFile(pa); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *NameBlacklistCheck) Finalize() map[*youtube.Comment]checks.Rating {
+func (c *CommentBlacklistCheck) Finalize() map[*youtube.Comment]checks.Rating {
 	return c.violations
 }
 
-func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) error {
+func (c *CommentBlacklistCheck) CheckComments(all map[string]*youtube.Comment) error {
 	bar := pb.New(len(all))
-	checked := make(map[string]bool)
 	for _, comment := range all {
 		bar.Increment()
-		authorID := comment.Snippet.AuthorChannelId.Value
-		if _, checked := checked[authorID]; checked {
-			continue
-		}
-		authorName := comment.Snippet.AuthorDisplayName
-		authorNameNorm := authorName
-		if compare.ContainsHomoglyphs(authorName) {
-			authorNameNorm = compare.Normalize(authorName)
+		body := comment.Snippet.TextOriginal
+		bodyNorm := body
+		if compare.ContainsHomoglyphs(body) {
+			bodyNorm = compare.Normalize(body)
 		}
 
 		for _, b := range c.blacklist {
 			normCmp := false
-			if authorName != authorNameNorm {
-				normCmp = b.Compare(authorNameNorm)
+			if body != bodyNorm {
+				normCmp = b.Compare(bodyNorm)
 			}
-			if b.Compare(authorName) || normCmp {
+			if b.Compare(body) || normCmp {
 				old, ok := c.violations[comment]
 				if !ok {
 					old = 0
@@ -63,7 +58,7 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 				c.violations[comment] = old
 
 				fmt.Println(nbPrefix(),
-					termenv.String(authorName).Foreground(p.Color("#E88388")),
+					termenv.String(comment.Snippet.AuthorDisplayName).Foreground(p.Color("#E88388")),
 					"<<",
 					termenv.String(b.String()).Foreground(p.Color("#D290E4")))
 			}

@@ -37,6 +37,7 @@ func (c *CommentCopyCatCheck) CheckComments(comments map[string]*youtube.Comment
 			fmt.Println()
 			log.Println("### ", cursor.Snippet.AuthorDisplayName, ":", trimBody(cursor), ":: copied", len(matches)-1, "times")
 		}
+
 		for _, matching := range matches {
 			if matching != earliest {
 				// check if author copied himself
