@@ -2,6 +2,14 @@ package main
 
 import (
 	"fmt"
+	name_blacklist "github.com/darmiel/yt-spam/internal/checks/comment-blacklist"
+	"github.com/darmiel/yt-spam/internal/checks/copycat"
+	fmt_spam "github.com/darmiel/yt-spam/internal/checks/fmt-spam"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+
 	"github.com/darmiel/yt-spam/internal/checks"
 	nameblacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
 	"github.com/darmiel/yt-spam/internal/ytspam"
@@ -9,13 +17,9 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
-	"io/ioutil"
-	"log"
-	"os"
-	"path"
 )
 
-const videoId string = "ddBBWrBa6QU"
+const videoId string = "tXe6wOOuDU0"
 
 func main() {
 	ctx := context.Background()
@@ -95,14 +99,16 @@ func main() {
 
 	checker := ytspam.NewCommentChecker(reader.GetComments())
 	if err := checker.Check(
-		// &copycat.CommentCopyCatCheck{},
-		&nameblacklist.NameBlacklistCheck{}); err != nil {
+		&copycat.CommentCopyCatCheck{},
+		&nameblacklist.NameBlacklistCheck{},
+		&name_blacklist.CommentBlacklistCheck{},
+		&fmt_spam.CommentBlacklistCheck{}); err != nil {
 		log.Fatalln("WARN ::", err)
 		return
 	}
 
 	fmt.Println()
-	log.Println("Found:")
+	log.Println("Found:", len(checker.Violations()))
 	for id, violations := range checker.Violations() {
 		log.Println("*", "https://www.youtube.com/channel/"+id, ":")
 		ratings := make(map[string]checks.Rating)
