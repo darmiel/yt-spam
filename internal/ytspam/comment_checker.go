@@ -2,6 +2,7 @@ package ytspam
 
 import (
 	"encoding/base64"
+	"fmt"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"google.golang.org/api/youtube/v3"
 	"strconv"
@@ -63,9 +64,11 @@ func (c *CommentChecker) Check(checks ...checks.CommentCheck) error {
 	}
 
 	for _, check := range checks {
+		fmt.Println("## Now checking with:", check.Name())
 		if err := check.CheckComments(c.comments); err != nil {
 			return err
 		}
+		fmt.Println()
 	}
 
 	// get results
