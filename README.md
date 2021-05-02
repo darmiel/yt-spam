@@ -1,6 +1,9 @@
 # yt-spam
 Small tool that tries to detect bots in comments.
 
+## Demo (Top x trending videos)
+https://user-images.githubusercontent.com/71837281/116814506-95e23100-ab59-11eb-9563-5c1c858c6da1.mov
+
 ## Checks
 There are currently the following checks:
 * [🔁  Format-Spam](#format-spam)
