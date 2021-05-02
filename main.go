@@ -53,8 +53,26 @@ func main() {
 						Name:     "video-id",
 						Aliases:  []string{"i"},
 					},
+					&cli.BoolFlag{Name: "cache-yes"},
 				},
 				Action: cmd.CheckCommand,
+			},
+			{
+				Name:        "trends",
+				Aliases:     []string{"t"},
+				UsageText:   "get videos from trends",
+				Description: "get videos from trends",
+				Category:    "checking",
+				Flags: []cli.Flag{
+					&cli.Int64Flag{
+						Name:    "max-videos",
+						Aliases: []string{"m"},
+						Value:   25,
+					},
+					&cli.BoolFlag{Name: "cache-yes"},
+					&cli.IntFlag{Name: "skip"},
+				},
+				Action: cmd.TrendCommand,
 			},
 		},
 	}

@@ -1,4 +1,4 @@
-package name_blacklist
+package cmt_blacklist
 
 import "github.com/muesli/termenv"
 

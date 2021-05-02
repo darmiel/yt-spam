@@ -45,6 +45,14 @@ func (r *CommentReader) addComment(comment *youtube.Comment) {
 	if comment == nil {
 		return
 	}
+	if comment.Snippet == nil {
+		log.Println("WARN :: (", comment.Id, ")", "Snippet was nil!")
+		return
+	}
+	if comment.Snippet.AuthorChannelId == nil {
+		log.Println("WARN :: (", comment.Id, ")", "Comment-Snippet-Channel-ID was nil!")
+		return
+	}
 	if r.comments == nil {
 		r.comments = make(map[string]*youtube.Comment)
 	} else {

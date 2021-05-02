@@ -7,6 +7,7 @@ import (
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
+	"log"
 	"path"
 )
 
@@ -39,6 +40,16 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 	checked := make(map[string]bool)
 	for _, comment := range all {
 		bar.Increment()
+
+		if comment.Snippet == nil {
+			log.Println("WARN :: (", comment.Id, ")", "Snippet was nil!")
+			continue
+		}
+		if comment.Snippet.AuthorChannelId == nil {
+			log.Println("WARN :: (", comment.Id, ")", "Comment-Snippet-Channel-ID was nil!")
+			continue
+		}
+
 		authorID := comment.Snippet.AuthorChannelId.Value
 		if _, checked := checked[authorID]; checked {
 			continue

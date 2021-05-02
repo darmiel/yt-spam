@@ -3,7 +3,9 @@ package commands
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/darmiel/yt-spam/internal/checks"
+	cmt_blacklist "github.com/darmiel/yt-spam/internal/checks/comment-blacklist"
+	"github.com/darmiel/yt-spam/internal/checks/copycat"
+	fmt_spam "github.com/darmiel/yt-spam/internal/checks/fmt-spam"
 	nameblacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
@@ -21,8 +23,49 @@ var (
 	VideoNotFound = errors.New("video not found")
 )
 
-func (cmd *Command) a(c *cli.Context) (*ytspam.CachedComments, error) {
+func (cmd *Command) CheckCommand(c *cli.Context) error {
 	videoID := c.String("video-id")
+	force := c.Bool("cache-yes")
+	return cmd.c(videoID, force)
+}
+
+func (cmd *Command) c(videoID string, forceUseCache bool) error {
+	cached, err := cmd.a(videoID, forceUseCache)
+	if err != nil {
+		return err
+	}
+	checker := ytspam.NewCommentChecker(cached.Wrap())
+	if err := checker.Check(
+		&nameblacklist.NameBlacklistCheck{},
+		&fmt_spam.CommentBlacklistCheck{},
+		&copycat.CommentCopyCatCheck{},
+		&cmt_blacklist.CommentBlacklistCheck{}); err != nil {
+		return err
+	}
+	/*
+		fmt.Println()
+		log.Println("Found:")
+			for id, violations := range checker.Violations() {
+				log.Println("*", "https://www.youtube.com/channel/"+id, ":")
+				ratings := make(map[string]checks.Rating)
+				for _, vl := range violations {
+					r, ok := ratings[vl.Check.Name()]
+					if !ok {
+						r = 0
+					}
+					r += vl.Rating
+					ratings[vl.Check.Name()] = r
+				}
+				for cn, cr := range ratings {
+					log.Println("  ├", cn, "::", cr, "(", cr.IsViolation(), ")")
+				}
+			}
+	*/
+	return nil
+}
+
+// TODO: give me a descriptive name, please :(
+func (cmd *Command) a(videoID string, forceUseCache bool) (*ytspam.CachedComments, error) {
 	data := make(map[string]*ytspam.CachedComments)
 	if videoID == "" {
 		var p survey.Prompt
@@ -79,13 +122,16 @@ func (cmd *Command) a(c *cli.Context) (*ytspam.CachedComments, error) {
 	}
 
 	fromCache := true
+
 	pth := path.Join("data", "cache", videoID+".json")
 	if _, err := os.Stat(pth); os.IsNotExist(err) {
 		fromCache = false
 	} else {
-		q := &survey.Confirm{Message: "Load comments from cache?"}
-		if err := survey.AskOne(q, &fromCache); err != nil {
-			return nil, err
+		if !forceUseCache {
+			q := &survey.Confirm{Message: "Load comments from cache?"}
+			if err := survey.AskOne(q, &fromCache); err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -146,35 +192,4 @@ func (cmd *Command) a(c *cli.Context) (*ytspam.CachedComments, error) {
 	}
 
 	return cmt, nil
-}
-
-func (cmd *Command) CheckCommand(c *cli.Context) error {
-	cached, err := cmd.a(c)
-	if err != nil {
-		return err
-	}
-	checker := ytspam.NewCommentChecker(cached.Wrap())
-	if err := checker.Check(
-		// &copycat.CommentCopyCatCheck{},
-		&nameblacklist.NameBlacklistCheck{}); err != nil {
-		return err
-	}
-	fmt.Println()
-	log.Println("Found:")
-	for id, violations := range checker.Violations() {
-		log.Println("*", "https://www.youtube.com/channel/"+id, ":")
-		ratings := make(map[string]checks.Rating)
-		for _, vl := range violations {
-			r, ok := ratings[vl.Check.Name()]
-			if !ok {
-				r = 0
-			}
-			r += vl.Rating
-			ratings[vl.Check.Name()] = r
-		}
-		for cn, cr := range ratings {
-			log.Println("  ├", cn, "::", cr, "(", cr.IsViolation(), ")")
-		}
-	}
-	return nil
 }
