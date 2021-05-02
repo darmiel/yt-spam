@@ -9,7 +9,13 @@ import (
 func (cmd *Command) TrendCommand(ctx *cli.Context) error {
 	max := ctx.Int64("max-videos")
 	force := ctx.Bool("cache-yes")
-	skip := ctx.Int("skip")
+	skipNum := ctx.Int("skip-num")
+	skipIds := ctx.StringSlice("skip-ids")
+
+	skipIdsMap := make(map[string]bool)
+	for _, i := range skipIds {
+		skipIdsMap[i] = true
+	}
 
 	call := cmd.Service.Videos.List([]string{"id", "snippet"}).
 		Chart("mostPopular").
@@ -36,7 +42,7 @@ func (cmd *Command) TrendCommand(ctx *cli.Context) error {
 	for _, v := range resp.Items {
 		i++
 		log.Println(":: Video:", v.Id, "=", v.Snippet.Title, "by", v.Snippet.ChannelTitle)
-		if skip != -1 && i <= skip {
+		if _, ok := skipIdsMap[v.Id]; ok || (skipNum != -1 && i <= skipNum) {
 			log.Println("   :: Skipped.")
 			continue
 		}
