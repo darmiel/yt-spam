@@ -1,21 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"github.com/darmiel/yt-spam/internal/checks"
-	nameblacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
-	"github.com/darmiel/yt-spam/internal/ytspam"
-	"github.com/muesli/termenv"
+	"github.com/darmiel/yt-spam/internal/commands"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/net/context"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
 )
-
-const videoId string = "ddBBWrBa6QU"
 
 func main() {
 	ctx := context.Background()
@@ -35,87 +29,37 @@ func main() {
 		return
 	}
 
-	call := service.Videos.List([]string{"snippet", "statistics"}).Id(videoId)
-	resp, err := call.Do()
-	if err != nil {
-		log.Fatalln("ERROR:", err)
-		return
-	}
-	if len(resp.Items) <= 0 {
-		log.Fatalln("No video found")
-		return
-	}
-	video := resp.Items[0]
+	cmd := &commands.Command{Service: service}
 
-	p := termenv.ColorProfile()
-	fmt.Println(termenv.String("YT-SPAM").Foreground(p.Color("0")).Background(p.Color("#E88388")),
-		"Reading comments from",
-		termenv.String(video.Snippet.Title).Foreground(p.Color("#A8CC8C")),
-		"(",
-		termenv.String(video.Snippet.PublishedAt).Foreground(p.Color("#D290E4")),
-		")")
-
-	reader := ytspam.NewCommentReader(service, video, &ytspam.CommentReaderConfig{
-		DisplayBar: true,
-		Silent:     false,
-	})
-
-	// TODO: CACHE ONLY FOR TESTING PURPOSES.
-	cp := path.Join("data", "cache", videoId+".json")
-	if _, err := os.Stat(cp); os.IsNotExist(err) {
-		log.Println("READ :: From YouTube")
-		// not cache
-		if err := reader.Read(); err != nil {
-			log.Fatalln("WARN ::", err)
-			return
-		}
-		b, err := reader.ToJSON()
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-		log.Println("READ :: Saving To Cache")
-		if err = ioutil.WriteFile(cp, b, 0777); err != nil {
-			log.Fatalln(err)
-			return
-		}
-	} else {
-		log.Println("READ :: From Cache")
-		// from cache
-		b, err := ioutil.ReadFile(cp)
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-		if err = reader.FromJSON(b); err != nil {
-			log.Fatalln(err)
-			return
-		}
+	app := &cli.App{
+		Authors: []*cli.Author{
+			{
+				Name:  "darmiel",
+				Email: "hi@d2a.io",
+			},
+		},
+		Version:     "0.1.0",
+		Description: "Anti YT-Spam",
+		Commands: []*cli.Command{
+			{
+				Name:        "check",
+				Aliases:     []string{"c"},
+				UsageText:   "applies all checks on a video",
+				Description: "applies all checks on a video",
+				Category:    "checking",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Required: true,
+						Name:     "video-id",
+						Aliases:  []string{"i"},
+					},
+				},
+				Action: cmd.CheckCommand,
+			},
+		},
 	}
 
-	checker := ytspam.NewCommentChecker(reader.GetComments())
-	if err := checker.Check(
-		// &copycat.CommentCopyCatCheck{},
-		&nameblacklist.NameBlacklistCheck{}); err != nil {
-		log.Fatalln("WARN ::", err)
-		return
-	}
-
-	fmt.Println()
-	log.Println("Found:")
-	for id, violations := range checker.Violations() {
-		log.Println("*", "https://www.youtube.com/channel/"+id, ":")
-		ratings := make(map[string]checks.Rating)
-		for _, vl := range violations {
-			r, ok := ratings[vl.Check.Name()]
-			if !ok {
-				r = 0
-			}
-			r += vl.Rating
-			ratings[vl.Check.Name()] = r
-		}
-		for cn, cr := range ratings {
-			log.Println("  ├", cn, "::", cr, "(", cr.IsViolation(), ")")
-		}
+	if err := app.Run(os.Args); err != nil {
+		log.Fatalln(err)
 	}
 }

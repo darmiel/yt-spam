@@ -1,7 +1,6 @@
 package ytspam
 
 import (
-	"encoding/json"
 	"github.com/cheggaaa/pb/v3"
 	"google.golang.org/api/youtube/v3"
 	"log"
@@ -38,26 +37,6 @@ func NewCommentReader(service *youtube.Service, video *youtube.Video, config ...
 		video:               video,
 		CommentReaderConfig: cfg,
 	}
-}
-
-func (r *CommentReader) FromJSON(data []byte) (err error) {
-	var val []*youtube.Comment
-	if err = json.Unmarshal(data, &val); err != nil {
-		return
-	}
-	for _, c := range val {
-		r.addComment(c)
-	}
-	return
-}
-
-func (r *CommentReader) ToJSON() (res []byte, err error) {
-	var val []*youtube.Comment
-	for _, c := range r.comments {
-		val = append(val, c)
-	}
-	res, err = json.Marshal(val)
-	return
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
