@@ -27,5 +27,5 @@ type ChannelCheck interface {
 	Name() string
 	Finalize() map[*youtube.Comment]Rating
 	Clean() error
-	CheckChannel(channel *youtube.Channel) error
+	CheckChannels(all []*youtube.Channel) error
 }

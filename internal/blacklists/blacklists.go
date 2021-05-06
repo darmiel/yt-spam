@@ -7,6 +7,16 @@ import (
 )
 
 // blacklists
+type StringBlacklist []compare.StringCompare
+
+func (b StringBlacklist) AnyMatch(s string) string {
+	for _, c := range b {
+		if c.Compare(s) {
+			return c.String()
+		}
+	}
+	return ""
+}
 
 // channel
 var (
@@ -48,7 +58,7 @@ func fatal(err error, file string) {
 	log.Fatal("FATAL :: [Blacklist] Failed to open file '", file, "'", msg, "\n")
 }
 
-func mustRead(file string) []compare.StringCompare {
+func mustRead(file string) StringBlacklist {
 	data, err := compare.FromFile(path.Join(InputDataPath, file))
 	if err != nil {
 		fatal(err, channelBlacklistFile)
