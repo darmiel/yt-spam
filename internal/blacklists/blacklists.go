@@ -9,13 +9,25 @@ import (
 // blacklists
 type StringBlacklist []compare.StringCompare
 
-func (b StringBlacklist) AnyMatch(s string) string {
+func (b StringBlacklist) AnyMatch(s string) compare.StringCompare {
 	for _, c := range b {
 		if c.Compare(s) {
-			return c.String()
+			return c
 		}
 	}
-	return ""
+	return nil
+}
+
+func (b StringBlacklist) AnyAnyMatch(s ...string) compare.StringCompare {
+	for i, str := range s {
+		if i > 0 && str == s[i-1] {
+			continue
+		}
+		if c := b.AnyMatch(str); c != nil {
+			return c
+		}
+	}
+	return nil
 }
 
 // channel

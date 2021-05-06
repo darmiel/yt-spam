@@ -1,4 +1,4 @@
-package name_blacklist
+package blacklist_checks
 
 import (
 	"fmt"
@@ -8,11 +8,14 @@ import (
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
-	"log"
 )
 
 type NameBlacklistCheck struct {
 	violations map[*youtube.Comment]checks.Rating
+}
+
+func (c *NameBlacklistCheck) Prefix() termenv.Style {
+	return termenv.String("✍️ NAME").Foreground(p.Color("0")).Background(p.Color("#DBAB79"))
 }
 
 func (c *NameBlacklistCheck) Name() string {
@@ -35,15 +38,6 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 	for _, comment := range all {
 		bar.Increment()
 
-		if comment.Snippet == nil {
-			log.Println("WARN :: (", comment.Id, ")", "Snippet was nil!")
-			continue
-		}
-		if comment.Snippet.AuthorChannelId == nil {
-			log.Println("WARN :: (", comment.Id, ")", "Comment-Snippet-Channel-ID was nil!")
-			continue
-		}
-
 		authorID := comment.Snippet.AuthorChannelId.Value
 		if _, checked := checked[authorID]; checked {
 			continue
@@ -54,24 +48,18 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 			authorNameNorm = compare.Normalize(authorName)
 		}
 
-		for _, b := range blacklists.NameBlacklist {
-			normCmp := false
-			if authorName != authorNameNorm {
-				normCmp = b.Compare(authorNameNorm)
+		if cmp := blacklists.NameBlacklist.AnyAnyMatch(authorName, authorNameNorm); cmp != nil {
+			old, ok := c.violations[comment]
+			if !ok {
+				old = 0
 			}
-			if b.Compare(authorName) || normCmp {
-				old, ok := c.violations[comment]
-				if !ok {
-					old = 0
-				}
-				old += 100
-				c.violations[comment] = old
+			old += 100
+			c.violations[comment] = old
 
-				fmt.Println(nbPrefix(),
-					termenv.String(authorName).Foreground(p.Color("#E88388")),
-					"<<",
-					termenv.String(b.String()).Foreground(p.Color("#D290E4")))
-			}
+			fmt.Println(c.Prefix(),
+				termenv.String(authorName).Foreground(p.Color("#E88388")),
+				"<<",
+				termenv.String(cmp.String()).Foreground(p.Color("#D290E4")))
 		}
 	}
 	bar.Finish()

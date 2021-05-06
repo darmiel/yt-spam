@@ -23,12 +23,8 @@ func extractFormattedWords(body string) (res []string) {
 
 var p = termenv.ColorProfile()
 
-func fsPrefix() termenv.Style {
-	return termenv.String("🔁 FMT-SPAM").Foreground(p.Color("0")).Background(p.Color("#DBAB79"))
-}
-
-func printSpamMessage(comment *youtube.Comment, word string, occurrences uint64) {
-	fmt.Println(fsPrefix(),
+func (c *FormatSpamCheck) printSpamMessage(comment *youtube.Comment, word string, occurrences uint64) {
+	fmt.Println(c.Prefix(),
 		termenv.String(comment.Snippet.AuthorDisplayName).Foreground(p.Color("#E88388")),
 		"used word",
 		termenv.String(word).Foreground(p.Color("#A8CC8C")),

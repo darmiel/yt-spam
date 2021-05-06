@@ -31,18 +31,18 @@ func (c *CommentCopyCatCheck) Finalize() map[*youtube.Comment]checks.Rating {
 	return c.violations
 }
 
-func ccPrefix() termenv.Style {
+func (c *CommentCopyCatCheck) Prefix() termenv.Style {
 	return termenv.String("🐈 COPY-CAT").Foreground(p.Color("0")).Background(p.Color("#D290E4"))
 }
 
-func printCCMessage(oc, ccc *youtube.Comment) {
+func (c *CommentCopyCatCheck) printCCMessage(oc, ccc *youtube.Comment) {
 	b := trimBody(oc)
 	if len(b) > 35 {
 		b = b[:32] + "..."
 	}
 	oa := oc.Snippet.AuthorDisplayName
 	cc := ccc.Snippet.AuthorDisplayName
-	fmt.Println(ccPrefix(),
+	fmt.Println(c.Prefix(),
 		termenv.String(cc).Foreground(p.Color("#E88388")),
 		"copied",
 		termenv.String(oa).Foreground(p.Color("#A8CC8C")),

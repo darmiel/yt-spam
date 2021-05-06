@@ -3,10 +3,9 @@ package commands
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	cmt_blacklist "github.com/darmiel/yt-spam/internal/checks/comment-blacklist"
+	blacklist_checks "github.com/darmiel/yt-spam/internal/checks/blacklist-checks"
 	"github.com/darmiel/yt-spam/internal/checks/copycat"
 	fmt_spam "github.com/darmiel/yt-spam/internal/checks/fmt-spam"
-	nameblacklist "github.com/darmiel/yt-spam/internal/checks/name-blacklist"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"github.com/pkg/errors"
@@ -36,10 +35,10 @@ func (cmd *Command) c(videoID string, forceUseCache bool) error {
 	}
 	checker := ytspam.NewCommentChecker(cached.Wrap())
 	if err := checker.Check(
-		&nameblacklist.NameBlacklistCheck{},
+		&blacklist_checks.NameBlacklistCheck{},
+		&blacklist_checks.CommentBlacklistCheck{},
 		&fmt_spam.FormatSpamCheck{},
-		&copycat.CommentCopyCatCheck{},
-		&cmt_blacklist.CommentBlacklistCheck{}); err != nil {
+		&copycat.CommentCopyCatCheck{}); err != nil {
 		return err
 	}
 	/*

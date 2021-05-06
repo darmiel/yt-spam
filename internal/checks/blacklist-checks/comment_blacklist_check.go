@@ -1,4 +1,4 @@
-package cmt_blacklist
+package blacklist_checks
 
 import (
 	"fmt"
@@ -12,12 +12,12 @@ import (
 
 var p = termenv.ColorProfile()
 
-func nbPrefix() termenv.Style {
-	return termenv.String("✍️ BODY").Foreground(p.Color("0")).Background(p.Color("#71BEF2"))
-}
-
 type CommentBlacklistCheck struct {
 	violations map[*youtube.Comment]checks.Rating
+}
+
+func (c *CommentBlacklistCheck) Prefix() termenv.Style {
+	return termenv.String("✍️ BODY").Foreground(p.Color("0")).Background(p.Color("#71BEF2"))
 }
 
 func (c *CommentBlacklistCheck) Name() string {
@@ -43,24 +43,18 @@ func (c *CommentBlacklistCheck) CheckComments(all map[string]*youtube.Comment) e
 			bodyNorm = compare.Normalize(body)
 		}
 
-		for _, b := range blacklists.CommentBlacklist {
-			normCmp := false
-			if body != bodyNorm {
-				normCmp = b.Compare(bodyNorm)
+		if cmp := blacklists.CommentBlacklist.AnyAnyMatch(body, bodyNorm); cmp != nil {
+			old, ok := c.violations[comment]
+			if !ok {
+				old = 0
 			}
-			if b.Compare(body) || normCmp {
-				old, ok := c.violations[comment]
-				if !ok {
-					old = 0
-				}
-				old += 100
-				c.violations[comment] = old
+			old += 100
+			c.violations[comment] = old
 
-				fmt.Println(nbPrefix(),
-					termenv.String(comment.Snippet.AuthorDisplayName).Foreground(p.Color("#E88388")),
-					"<<",
-					termenv.String(b.String()).Foreground(p.Color("#D290E4")))
-			}
+			fmt.Println(c.Prefix(),
+				termenv.String(comment.Snippet.AuthorDisplayName).Foreground(p.Color("#E88388")),
+				"<<",
+				termenv.String(cmp.String()).Foreground(p.Color("#D290E4")))
 		}
 	}
 	bar.Finish()

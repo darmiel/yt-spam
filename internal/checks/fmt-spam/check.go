@@ -4,6 +4,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/darmiel/yt-spam/internal/compare"
+	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
 	"strings"
 )
@@ -16,6 +17,10 @@ const (
 type FormatSpamCheck struct {
 	violations map[*youtube.Comment]checks.Rating
 	words      map[string]uint64
+}
+
+func (c *FormatSpamCheck) Prefix() termenv.Style {
+	return termenv.String("🔁 FMT-SPAM").Foreground(p.Color("0")).Background(p.Color("#DBAB79"))
 }
 
 func (c *FormatSpamCheck) Name() string {
@@ -85,7 +90,7 @@ func (c *FormatSpamCheck) CheckComments(all map[string]*youtube.Comment) error {
 				continue
 			}
 
-			printSpamMessage(comment, w, occ)
+			c.printSpamMessage(comment, w, occ)
 			c.violations[comment] = 100
 		}
 	}
