@@ -3,16 +3,21 @@ package cmt_blacklist
 import (
 	"fmt"
 	"github.com/cheggaaa/pb/v3"
+	"github.com/darmiel/yt-spam/internal/blacklists"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
-	"path"
 )
+
+var p = termenv.ColorProfile()
+
+func nbPrefix() termenv.Style {
+	return termenv.String("✍️ BODY").Foreground(p.Color("0")).Background(p.Color("#71BEF2"))
+}
 
 type CommentBlacklistCheck struct {
 	violations map[*youtube.Comment]checks.Rating
-	blacklist  []compare.StringCompare
 }
 
 func (c *CommentBlacklistCheck) Name() string {
@@ -21,12 +26,6 @@ func (c *CommentBlacklistCheck) Name() string {
 
 func (c *CommentBlacklistCheck) Clean() error {
 	c.violations = make(map[*youtube.Comment]checks.Rating)
-	// read blacklist
-	var err error
-	pa := path.Join("data", "input", "comment-blacklist.txt")
-	if c.blacklist, err = compare.FromFile(pa); err != nil {
-		return err
-	}
 	return nil
 }
 
@@ -44,7 +43,7 @@ func (c *CommentBlacklistCheck) CheckComments(all map[string]*youtube.Comment) e
 			bodyNorm = compare.Normalize(body)
 		}
 
-		for _, b := range c.blacklist {
+		for _, b := range blacklists.CommentBlacklist {
 			normCmp := false
 			if body != bodyNorm {
 				normCmp = b.Compare(bodyNorm)

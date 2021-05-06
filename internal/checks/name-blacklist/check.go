@@ -3,17 +3,16 @@ package name_blacklist
 import (
 	"fmt"
 	"github.com/cheggaaa/pb/v3"
+	"github.com/darmiel/yt-spam/internal/blacklists"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
 	"google.golang.org/api/youtube/v3"
 	"log"
-	"path"
 )
 
 type NameBlacklistCheck struct {
 	violations map[*youtube.Comment]checks.Rating
-	blacklist  []compare.StringCompare
 }
 
 func (c *NameBlacklistCheck) Name() string {
@@ -22,12 +21,7 @@ func (c *NameBlacklistCheck) Name() string {
 
 func (c *NameBlacklistCheck) Clean() error {
 	c.violations = make(map[*youtube.Comment]checks.Rating)
-	// read blacklist
-	var err error
-	pa := path.Join("data", "input", "name-blacklist.txt")
-	if c.blacklist, err = compare.FromFile(pa); err != nil {
-		return err
-	}
+
 	return nil
 }
 
@@ -60,7 +54,7 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 			authorNameNorm = compare.Normalize(authorName)
 		}
 
-		for _, b := range c.blacklist {
+		for _, b := range blacklists.NameBlacklist {
 			normCmp := false
 			if authorName != authorNameNorm {
 				normCmp = b.Compare(authorNameNorm)

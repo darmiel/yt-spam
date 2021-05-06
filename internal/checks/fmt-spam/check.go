@@ -13,26 +13,26 @@ const (
 	FmtSpamMinOccurrences = 3
 )
 
-type CommentBlacklistCheck struct {
+type FormatSpamCheck struct {
 	violations map[*youtube.Comment]checks.Rating
 	words      map[string]uint64
 }
 
-func (c *CommentBlacklistCheck) Name() string {
+func (c *FormatSpamCheck) Name() string {
 	return "Format-Spam"
 }
 
-func (c *CommentBlacklistCheck) Clean() error {
+func (c *FormatSpamCheck) Clean() error {
 	c.violations = make(map[*youtube.Comment]checks.Rating)
 	c.words = make(map[string]uint64)
 	return nil
 }
 
-func (c *CommentBlacklistCheck) Finalize() map[*youtube.Comment]checks.Rating {
+func (c *FormatSpamCheck) Finalize() map[*youtube.Comment]checks.Rating {
 	return c.violations
 }
 
-func (c *CommentBlacklistCheck) CheckComments(all map[string]*youtube.Comment) error {
+func (c *FormatSpamCheck) CheckComments(all map[string]*youtube.Comment) error {
 	bar := pb.New(len(all) * 2)
 	for _, comment := range all {
 		bar.Increment()

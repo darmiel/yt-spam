@@ -2,6 +2,7 @@ package copycat
 
 import (
 	"fmt"
+	"github.com/cheggaaa/pb/v3"
 	"google.golang.org/api/youtube/v3"
 	"log"
 )
@@ -13,7 +14,9 @@ const (
 func (c *CommentCopyCatCheck) CheckComments(comments map[string]*youtube.Comment) error {
 	checked := make(map[string]bool)
 
+	bar := pb.New(len(comments))
 	for _, cursor := range comments {
+		bar.Increment()
 
 		// check length
 		if len(trimBody(cursor)) < CopyCatMinCommentLength {
@@ -54,6 +57,7 @@ func (c *CommentCopyCatCheck) CheckComments(comments map[string]*youtube.Comment
 			fmt.Println()
 		}
 	}
+	bar.Finish()
 
 	log.Println("Checked a total of", len(checked), "comments.")
 	return nil

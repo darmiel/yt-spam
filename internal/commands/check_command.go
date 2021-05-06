@@ -37,7 +37,7 @@ func (cmd *Command) c(videoID string, forceUseCache bool) error {
 	checker := ytspam.NewCommentChecker(cached.Wrap())
 	if err := checker.Check(
 		&nameblacklist.NameBlacklistCheck{},
-		&fmt_spam.CommentBlacklistCheck{},
+		&fmt_spam.FormatSpamCheck{},
 		&copycat.CommentCopyCatCheck{},
 		&cmt_blacklist.CommentBlacklistCheck{}); err != nil {
 		return err
