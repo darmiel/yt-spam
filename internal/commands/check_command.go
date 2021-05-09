@@ -80,16 +80,19 @@ func (cmd *Command) a(videoID string, forceUseCache bool) (*ytspam.CachedComment
 		}
 
 		// read all cached files
-		glob, err := filepath.Glob(path.Join("data", "cache", "**"))
+		glob, err := filepath.Glob(path.Join("data", "cache", "*.json"))
 		if err != nil {
 			return nil, err
 		}
+
+		log.Println(":: Reading", len(glob), "files...")
 
 		var keys []string
 		for _, pth := range glob {
 			// read cache #n
 			c, err := ytspam.CacheFromPath(pth)
 			if err != nil {
+				log.Println("Failed at file:", pth)
 				return nil, err
 			}
 			display := fmt.Sprintf("[%s]: %s", c.LastUpdate.Format("02.01.2006 15:04:05"), c.VideoTitle)
@@ -103,7 +106,7 @@ func (cmd *Command) a(videoID string, forceUseCache bool) (*ytspam.CachedComment
 
 		p = &survey.Select{Message: "Select Cached Video", Options: keys}
 		var title string
-		if err := survey.AskOne(p, &title); err != nil {
+		if err := survey.AskOne(p, &title, survey.WithPageSize(25)); err != nil {
 			return nil, err
 		}
 		if title == "" {

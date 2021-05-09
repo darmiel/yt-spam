@@ -49,9 +49,8 @@ func main() {
 				Category:    "checking",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Required: true,
-						Name:     "video-id",
-						Aliases:  []string{"i"},
+						Name:    "video-id",
+						Aliases: []string{"i"},
 					},
 					&cli.BoolFlag{Name: "cache-yes"},
 				},
