@@ -2,10 +2,11 @@ package ytspam
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"google.golang.org/api/youtube/v3"
+	"log"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -63,13 +64,19 @@ func (c *CommentChecker) Check(checks ...checks.CommentCheck) error {
 		}
 	}
 
+	var wg sync.WaitGroup
 	for _, check := range checks {
-		fmt.Println("## Now checking with:", check.Name())
-		if err := check.CheckComments(c.comments); err != nil {
-			return err
-		}
-		fmt.Println()
+		wg.Add(1)
+		check := check
+		go func() {
+			log.Println("Starting check for", check.Name())
+			if err := check.CheckComments(c.comments); err != nil {
+				log.Fatalln("FATAL checking comments:", err)
+			}
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 
 	// get results
 	for _, check := range checks {

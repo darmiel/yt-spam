@@ -2,7 +2,6 @@ package blacklist_checks
 
 import (
 	"fmt"
-	"github.com/cheggaaa/pb/v3"
 	"github.com/darmiel/yt-spam/internal/blacklists"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/darmiel/yt-spam/internal/compare"
@@ -33,11 +32,8 @@ func (c *NameBlacklistCheck) Finalize() map[*youtube.Comment]checks.Rating {
 }
 
 func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) error {
-	bar := pb.New(len(all))
 	checked := make(map[string]bool)
 	for _, comment := range all {
-		bar.Increment()
-
 		authorID := comment.Snippet.AuthorChannelId.Value
 		if _, checked := checked[authorID]; checked {
 			continue
@@ -62,6 +58,5 @@ func (c *NameBlacklistCheck) CheckComments(all map[string]*youtube.Comment) erro
 				termenv.String(cmp.String()).Foreground(p.Color("#D290E4")))
 		}
 	}
-	bar.Finish()
 	return nil
 }

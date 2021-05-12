@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"log"
+	"sync"
 )
 
 func (cmd *Command) TrendCommand(ctx *cli.Context) error {
@@ -38,6 +39,7 @@ func (cmd *Command) TrendCommand(ctx *cli.Context) error {
 	fmt.Println("---")
 	fmt.Println()
 
+	var wg sync.WaitGroup
 	i := 0
 	for _, v := range resp.Items {
 		i++
@@ -46,9 +48,13 @@ func (cmd *Command) TrendCommand(ctx *cli.Context) error {
 			log.Println("   :: Skipped.")
 			continue
 		}
-		if err := cmd.c(v.Id, force); err != nil {
-			return err
-		}
+		id := v.Id
+		wg.Add(1)
+		go func() {
+			log.Println("id:", id, "result:", cmd.c(id, force))
+			wg.Done()
+		}()
 	}
+	wg.Wait()
 	return nil
 }

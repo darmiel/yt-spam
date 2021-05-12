@@ -2,7 +2,6 @@ package blacklist_checks
 
 import (
 	"fmt"
-	"github.com/cheggaaa/pb/v3"
 	"github.com/darmiel/yt-spam/internal/blacklists"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/darmiel/yt-spam/internal/compare"
@@ -34,9 +33,7 @@ func (c *CommentBlacklistCheck) Finalize() map[*youtube.Comment]checks.Rating {
 }
 
 func (c *CommentBlacklistCheck) CheckComments(all map[string]*youtube.Comment) error {
-	bar := pb.New(len(all))
 	for _, comment := range all {
-		bar.Increment()
 		body := comment.Snippet.TextOriginal
 		bodyNorm := body
 		if compare.ContainsHomoglyphs(body) {
@@ -57,6 +54,5 @@ func (c *CommentBlacklistCheck) CheckComments(all map[string]*youtube.Comment) e
 				termenv.String(cmp.String()).Foreground(p.Color("#D290E4")))
 		}
 	}
-	bar.Finish()
 	return nil
 }

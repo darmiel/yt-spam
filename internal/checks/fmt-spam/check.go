@@ -1,7 +1,6 @@
 package fmt_spam
 
 import (
-	"github.com/cheggaaa/pb/v3"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"github.com/darmiel/yt-spam/internal/compare"
 	"github.com/muesli/termenv"
@@ -38,10 +37,7 @@ func (c *FormatSpamCheck) Finalize() map[*youtube.Comment]checks.Rating {
 }
 
 func (c *FormatSpamCheck) CheckComments(all map[string]*youtube.Comment) error {
-	bar := pb.New(len(all) * 2)
 	for _, comment := range all {
-		bar.Increment()
-
 		body := comment.Snippet.TextOriginal
 		if compare.ContainsHomoglyphs(body) {
 			body = compare.Normalize(body)
@@ -69,8 +65,6 @@ func (c *FormatSpamCheck) CheckComments(all map[string]*youtube.Comment) error {
 	}
 
 	for _, comment := range all {
-		bar.Increment()
-
 		body := comment.Snippet.TextOriginal
 		if compare.ContainsHomoglyphs(body) {
 			body = compare.Normalize(body)
@@ -94,6 +88,5 @@ func (c *FormatSpamCheck) CheckComments(all map[string]*youtube.Comment) error {
 			c.violations[comment] = 100
 		}
 	}
-	bar.Finish()
 	return nil
 }
