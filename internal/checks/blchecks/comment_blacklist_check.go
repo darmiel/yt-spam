@@ -10,19 +10,23 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-type CommentBlacklistCheck struct {
+type commentBlacklistCheck struct {
 	channel chan *checks.CommentRatingNotify
 }
 
-func (c *CommentBlacklistCheck) Prefix() termenv.Style {
+func NewCommentBlacklistCheck(channel chan *checks.CommentRatingNotify) *commentBlacklistCheck {
+	return &commentBlacklistCheck{channel}
+}
+
+func (c *commentBlacklistCheck) Prefix() termenv.Style {
 	return common.CreatePrefix("📝", "BODY-BL", "71BEF2")
 }
 
-func (c *CommentBlacklistCheck) Name() string {
+func (c *commentBlacklistCheck) Name() string {
 	return "Body-Blacklist"
 }
 
-func (c *CommentBlacklistCheck) SendViolation(i ...interface{}) {
+func (c *commentBlacklistCheck) SendViolation(i ...interface{}) {
 	var (
 		comment   = i[0].(*youtube.Comment)
 		blacklist = i[1].(compare.StringCompare)
@@ -42,7 +46,7 @@ func (c *CommentBlacklistCheck) SendViolation(i ...interface{}) {
 	}
 }
 
-func (c *CommentBlacklistCheck) CheckComment(comment *youtube.Comment) {
+func (c *commentBlacklistCheck) CheckComment(comment *youtube.Comment) {
 	body := comment.Snippet.TextOriginal
 	bodyNorm := body
 	if compare.ContainsHomoglyphs(body) {

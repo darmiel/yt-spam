@@ -10,20 +10,24 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-type NameBlacklistCheck struct {
+type nameBlacklistCheck struct {
 	channel chan *checks.ChannelRatingNotify
 	checked map[string]bool
 }
 
-func (c *NameBlacklistCheck) Prefix() termenv.Style {
+func NewNameBlacklistCheck(channel chan *checks.ChannelRatingNotify) *nameBlacklistCheck {
+	return &nameBlacklistCheck{channel, make(map[string]bool)}
+}
+
+func (c *nameBlacklistCheck) Prefix() termenv.Style {
 	return common.CreatePrefix("👦", "NAME-BL", "DBAB79")
 }
 
-func (c *NameBlacklistCheck) Name() string {
+func (c *nameBlacklistCheck) Name() string {
 	return "Name-Blacklist"
 }
 
-func (c *NameBlacklistCheck) SendViolation(i ...interface{}) {
+func (c *nameBlacklistCheck) SendViolation(i ...interface{}) {
 	var (
 		comment = i[0].(*youtube.Comment)
 		cmp     = i[1].(compare.StringCompare)
@@ -41,7 +45,7 @@ func (c *NameBlacklistCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *NameBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) {
+func (c *nameBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) {
 	authorID := comment.Snippet.AuthorChannelId.Value
 	if _, checked := c.checked[authorID]; checked {
 		return

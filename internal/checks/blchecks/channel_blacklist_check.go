@@ -8,19 +8,23 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-type ChannelBlacklistCheck struct {
+type channelBlacklistCheck struct {
 	channel chan *checks.ChannelRatingNotify
 }
 
-func (c *ChannelBlacklistCheck) Prefix() termenv.Style {
+func NewChannelBlacklistCheck(channel chan *checks.ChannelRatingNotify) *channelBlacklistCheck {
+	return &channelBlacklistCheck{channel}
+}
+
+func (c *channelBlacklistCheck) Prefix() termenv.Style {
 	return common.CreatePrefix("📺", "CHAN-BL", "DBAB79")
 }
 
-func (c *ChannelBlacklistCheck) Name() string {
+func (c *channelBlacklistCheck) Name() string {
 	return "Channel-Blacklist"
 }
 
-func (c *ChannelBlacklistCheck) SendViolation(i ...interface{}) {
+func (c *channelBlacklistCheck) SendViolation(i ...interface{}) {
 	var (
 		name = i[0].(string)
 		id   = i[1].(string)
@@ -35,7 +39,7 @@ func (c *ChannelBlacklistCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *ChannelBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) {
+func (c *channelBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) {
 	if i := blacklists.ChannelBlacklist.AnyMatch(comment.Snippet.AuthorChannelId.Value); i != nil {
 		c.SendViolation(comment.Snippet.AuthorDisplayName,
 			comment.Snippet.AuthorChannelId.Value)

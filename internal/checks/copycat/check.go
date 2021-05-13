@@ -8,20 +8,24 @@ import (
 	"google.golang.org/api/youtube/v3"
 )
 
-type CommentCopyCatCheck struct {
+type commentCopyCatCheck struct {
 	channel chan *checks.CommentRatingNotify
 	minLen  int
 }
 
-func (c *CommentCopyCatCheck) Name() string {
+func NewCommentCopyCatCheck(channel chan *checks.CommentRatingNotify, minLen int) *commentCopyCatCheck {
+	return &commentCopyCatCheck{channel, minLen}
+}
+
+func (c *commentCopyCatCheck) Name() string {
 	return "Copy Cat"
 }
 
-func (c *CommentCopyCatCheck) Prefix() termenv.Style {
+func (c *commentCopyCatCheck) Prefix() termenv.Style {
 	return common.CreatePrefix("🐈", "COPY-CAT", "D290E4")
 }
 
-func (c *CommentCopyCatCheck) SendViolation(i ...interface{}) {
+func (c *commentCopyCatCheck) SendViolation(i ...interface{}) {
 	var (
 		original = i[0].(*youtube.Comment)
 		copycat  = i[1].(*youtube.Comment)
@@ -46,7 +50,7 @@ func (c *CommentCopyCatCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *CommentCopyCatCheck) CheckComments(comments []*youtube.Comment) {
+func (c *commentCopyCatCheck) CheckComments(comments []*youtube.Comment) {
 	checked := make(map[string]bool)
 	for _, cursor := range comments {
 		// check length

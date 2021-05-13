@@ -10,18 +10,22 @@ import (
 	"strings"
 )
 
-type FormatSpamCheck struct {
+type formatSpamCheck struct {
 	channel chan *checks.CommentRatingNotify
 	words   map[string]uint64
 	minLen  int
 	minOcc  uint64
 }
 
-func (c *FormatSpamCheck) Name() string {
+func NewFormatSpamCheck(channel chan *checks.CommentRatingNotify, minLen int, minOcc uint64) *formatSpamCheck {
+	return &formatSpamCheck{channel, make(map[string]uint64), minLen, minOcc}
+}
+
+func (c *formatSpamCheck) Name() string {
 	return "Format-Spam"
 }
 
-func (c *FormatSpamCheck) Prefix() termenv.Style {
+func (c *formatSpamCheck) Prefix() termenv.Style {
 	return common.CreatePrefix("🔁", "FMT-SPAM", "DBAB79")
 }
 
@@ -29,7 +33,7 @@ func (c *FormatSpamCheck) Prefix() termenv.Style {
 // 1 -> word
 // 2 -> occurrences
 // 3 -> rating
-func (c *FormatSpamCheck) SendViolation(i ...interface{}) {
+func (c *formatSpamCheck) SendViolation(i ...interface{}) {
 	var (
 		comment = i[0].(*youtube.Comment)
 		word    = i[1].(string)
@@ -46,7 +50,7 @@ func (c *FormatSpamCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *FormatSpamCheck) CheckComments(comments []*youtube.Comment) {
+func (c *formatSpamCheck) CheckComments(comments []*youtube.Comment) {
 	for _, comment := range comments {
 		body := comment.Snippet.TextOriginal
 		if compare.ContainsHomoglyphs(body) {

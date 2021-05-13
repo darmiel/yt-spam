@@ -3,9 +3,9 @@ package commands
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	blacklist_checks "github.com/darmiel/yt-spam/internal/checks/blchecks"
+	"github.com/darmiel/yt-spam/internal/checks/blchecks"
 	"github.com/darmiel/yt-spam/internal/checks/copycat"
-	fmt_spam "github.com/darmiel/yt-spam/internal/checks/fmtspam"
+	"github.com/darmiel/yt-spam/internal/checks/fmtspam"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"github.com/pkg/errors"
@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -33,33 +34,21 @@ func (cmd *Command) c(videoID string, forceUseCache bool) error {
 	if err != nil {
 		return err
 	}
-	checker := ytspam.NewCommentChecker(cached.Wrap())
-	if err := checker.Check(
-		&blacklist_checks.NameBlacklistCheck{},
-		&blacklist_checks.CommentBlacklistCheck{},
-		&fmt_spam.FormatSpamCheck{},
-		&copycat.CommentCopyCatCheck{}); err != nil {
-		return err
-	}
-	/*
-		fmt.Println()
-		log.Println("Found:")
-			for id, violations := range checker.Violations() {
-				log.Println("*", "https://www.youtube.com/channel/"+id, ":")
-				ratings := make(map[string]checks.Rating)
-				for _, vl := range violations {
-					r, ok := ratings[vl.Check.Name()]
-					if !ok {
-						r = 0
-					}
-					r += vl.Rating
-					ratings[vl.Check.Name()] = r
-				}
-				for cn, cr := range ratings {
-					log.Println("  ├", cn, "::", cr, "(", cr.IsViolation(), ")")
-				}
-			}
-	*/
+	checker := ytspam.NewCommentChecker(cached.WrapArray())
+
+	checker.Check(blchecks.NewChannelBlacklistCheck(checker.ResChannels),
+		blchecks.NewCommentBlacklistCheck(checker.ResComments),
+		blchecks.NewNameBlacklistCheck(checker.ResChannels),
+		copycat.NewCommentCopyCatCheck(checker.ResComments, 28),
+		fmtspam.NewFormatSpamCheck(checker.ResComments, 7, 4))
+
+	wg := new(sync.WaitGroup)
+	wg.Add(3)
+	go checker.ReadChannels(os.Stdout, wg)
+	go checker.ReadComments(os.Stdout, wg)
+	go checker.ReadErrors(os.Stdout, wg)
+	wg.Wait()
+
 	return nil
 }
 

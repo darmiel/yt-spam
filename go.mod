@@ -16,4 +16,5 @@ require (
 	google.golang.org/api v0.44.0
 	google.golang.org/genproto v0.0.0-20210414175830-92282443c685 // indirect
 	google.golang.org/grpc v1.37.0 // indirect
+	gopkg.in/errgo.v2 v2.1.0
 )

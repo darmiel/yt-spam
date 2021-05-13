@@ -28,10 +28,20 @@ func (c *CachedComments) SaveTo(p string) error {
 	return ioutil.WriteFile(p, dat, 0766)
 }
 
-func (c *CachedComments) Wrap() map[string]*youtube.Comment {
+func (c *CachedComments) WrapMap() map[string]*youtube.Comment {
 	res := make(map[string]*youtube.Comment)
 	for _, c := range c.Comments {
 		res[c.Id] = c
+	}
+	return res
+}
+
+func (c *CachedComments) WrapArray() []*youtube.Comment {
+	res := make([]*youtube.Comment, len(c.Comments))
+	i := 0
+	for _, comment := range c.Comments {
+		res[i] = comment
+		i++
 	}
 	return res
 }
