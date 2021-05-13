@@ -42,7 +42,7 @@ func (c *CommentBlacklistCheck) SendViolation(i ...interface{}) {
 	}
 }
 
-func (c *CommentBlacklistCheck) CheckComment(comment *youtube.Comment) error {
+func (c *CommentBlacklistCheck) CheckComment(comment *youtube.Comment) {
 	body := comment.Snippet.TextOriginal
 	bodyNorm := body
 	if compare.ContainsHomoglyphs(body) {
@@ -51,5 +51,4 @@ func (c *CommentBlacklistCheck) CheckComment(comment *youtube.Comment) error {
 	if cmp := blacklists.CommentBlacklist.AnyAnyMatch(body, bodyNorm); cmp != nil {
 		c.SendViolation(comment, cmp)
 	}
-	return nil
 }

@@ -37,42 +37,28 @@ type NamedCheck interface {
 	SendViolation(...interface{})
 }
 
+// ok
 type SingleCommentCheck interface {
-	Name() string
-	Prefix() termenv.Style
-	SendViolation(...interface{})
-
-	CheckComment(comment *youtube.Comment) error
+	NamedCheck
+	CheckComment(comment *youtube.Comment)
 }
 
 type MultiCommentCheck interface {
-	Name() string
-	Prefix() termenv.Style
-	SendViolation(...interface{})
-
-	CheckComments(comments []*youtube.Comment) error
+	NamedCheck
+	CheckComments(comments []*youtube.Comment)
 }
 
 type SingleChannelCheck interface {
-	Name() string
-	Prefix() termenv.Style
-	SendViolation(...interface{})
-
-	CheckChannel(channel *youtube.Channel) error
+	NamedCheck
+	CheckChannel(channel *youtube.Channel)
 }
 
 type MultiChannelCheck interface {
-	Name() string
-	Prefix() termenv.Style
-	SendViolation(...interface{})
-
-	CheckChannels(channels []*youtube.Channel) error
+	NamedCheck
+	CheckChannels(channels []*youtube.Channel)
 }
 
 type CommentChannelCheck interface {
-	Name() string
-	Prefix() termenv.Style
-	SendViolation(...interface{})
-
-	CheckChannelByComment(comment *youtube.Comment) error
+	NamedCheck
+	CheckChannelByComment(comment *youtube.Comment)
 }

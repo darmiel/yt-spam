@@ -41,21 +41,18 @@ func (c *NameBlacklistCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *NameBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) error {
+func (c *NameBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) {
 	authorID := comment.Snippet.AuthorChannelId.Value
 	if _, checked := c.checked[authorID]; checked {
-		return nil
+		return
 	}
 	c.checked[authorID] = true
-
 	authorName := comment.Snippet.AuthorDisplayName
 	authorNameNorm := authorName
 	if compare.ContainsHomoglyphs(authorName) {
 		authorNameNorm = compare.Normalize(authorName)
 	}
-
 	if cmp := blacklists.NameBlacklist.AnyAnyMatch(authorName, authorNameNorm); cmp != nil {
 		c.SendViolation(comment, cmp)
 	}
-	return nil
 }

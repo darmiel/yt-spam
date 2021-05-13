@@ -35,10 +35,9 @@ func (c *ChannelBlacklistCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *ChannelBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) error {
+func (c *ChannelBlacklistCheck) CheckChannelByComment(comment *youtube.Comment) {
 	if i := blacklists.ChannelBlacklist.AnyMatch(comment.Snippet.AuthorChannelId.Value); i != nil {
 		c.SendViolation(comment.Snippet.AuthorDisplayName,
 			comment.Snippet.AuthorChannelId.Value)
 	}
-	return nil
 }

@@ -46,7 +46,7 @@ func (c *FormatSpamCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *FormatSpamCheck) CheckComments(comments []*youtube.Comment) error {
+func (c *FormatSpamCheck) CheckComments(comments []*youtube.Comment) {
 	for _, comment := range comments {
 		body := comment.Snippet.TextOriginal
 		if compare.ContainsHomoglyphs(body) {
@@ -97,5 +97,4 @@ func (c *FormatSpamCheck) CheckComments(comments []*youtube.Comment) error {
 			c.SendViolation(comment, w, occ, checks.Rating(100))
 		}
 	}
-	return nil
 }

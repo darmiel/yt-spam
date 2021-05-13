@@ -4,20 +4,19 @@ import (
 	"encoding/base64"
 	"github.com/darmiel/yt-spam/internal/checks"
 	"google.golang.org/api/youtube/v3"
-	"log"
+	"gopkg.in/errgo.v2/fmt/errors"
 	"strconv"
 	"sync"
 	"time"
 )
 
 type CommentChecker struct {
-	id         string
-	comments   map[string]*youtube.Comment
-	violations map[string][]*checks.Violation
-}
+	id       string
+	comments []*youtube.Comment
 
-func (c *CommentChecker) Violations() map[string][]*checks.Violation {
-	return c.violations
+	resErrors   chan error
+	resComments chan *checks.CommentRatingNotify
+	resChannels chan *checks.ChannelRatingNotify
 }
 
 // CurrentTime << 4 | Worker
@@ -31,61 +30,54 @@ func newID() string {
 	return base64.StdEncoding.EncodeToString(b)
 }
 
-func NewCommentChecker(comments map[string]*youtube.Comment) *CommentChecker {
+///
+
+func NewCommentChecker(comments []*youtube.Comment) *CommentChecker {
 	evID := newID()
 	return &CommentChecker{
-		id:         evID,
-		comments:   comments,
-		violations: make(map[string][]*checks.Violation),
+		id:       evID,
+		comments: comments,
 	}
 }
 
-func (c *CommentChecker) addViolation(comment *youtube.Comment, check checks.Check, rating checks.Rating) {
-	if c.violations == nil {
-		c.violations = make(map[string][]*checks.Violation)
+func (c *CommentChecker) executeSingle(wg *sync.WaitGroup, fc func(comment *youtube.Comment)) {
+	for _, comment := range c.comments {
+		fc(comment)
 	}
-	authorID := comment.Snippet.AuthorChannelId.Value
-	violations, ok := c.violations[authorID]
-	if !ok {
-		violations = make([]*checks.Violation, 0)
+	if err := recover(); err != nil {
+		c.resErrors <- errors.Newf("%v", err)
 	}
-	violations = append(violations, &checks.Violation{
-		Rating: rating,
-		Check:  check,
-	})
-	c.violations[authorID] = violations
+	wg.Done()
 }
 
-func (c *CommentChecker) Check(checks ...checks.CommentCheck) error {
-	// clean checks
-	for _, check := range checks {
-		if err := check.Clean(); err != nil {
-			return err
-		}
+func (c *CommentChecker) executeMulti(wg *sync.WaitGroup, fc func(comments []*youtube.Comment)) {
+	fc(c.comments)
+	if err := recover(); err != nil {
+		c.resErrors <- errors.Newf("%v", err)
 	}
+	wg.Done()
+}
 
+func (c *CommentChecker) Check(ch ...checks.NamedCheck) {
 	var wg sync.WaitGroup
-	for _, check := range checks {
-		wg.Add(1)
-		check := check
-		go func() {
-			log.Println("Starting check for", check.Name())
-			if err := check.CheckComments(c.comments); err != nil {
-				log.Fatalln("FATAL checking comments:", err)
-			}
-			wg.Done()
-		}()
+	for _, check := range ch {
+		// 1. Channel Checks
+		if check, ok := check.(checks.CommentChannelCheck); ok {
+			wg.Add(1)
+			go c.executeSingle(&wg, check.CheckChannelByComment)
+		}
+
+		// 2. Single Comments
+		if check, ok := check.(checks.SingleCommentCheck); ok {
+			wg.Add(1)
+			go c.executeSingle(&wg, check.CheckComment)
+		}
+
+		// 3. Multiple Comments
+		if check, ok := check.(checks.MultiCommentCheck); ok {
+			wg.Add(1)
+			go c.executeMulti(&wg, check.CheckComments)
+		}
 	}
 	wg.Wait()
-
-	// get results
-	for _, check := range checks {
-		for comment, rating := range check.Finalize() {
-			if !rating.IsViolation() {
-				continue
-			}
-			c.addViolation(comment, check, rating)
-		}
-	}
-	return nil
 }

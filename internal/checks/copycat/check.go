@@ -46,7 +46,7 @@ func (c *CommentCopyCatCheck) SendViolation(i ...interface{}) {
 
 ///
 
-func (c *CommentCopyCatCheck) CheckComments(comments []*youtube.Comment) error {
+func (c *CommentCopyCatCheck) CheckComments(comments []*youtube.Comment) {
 	checked := make(map[string]bool)
 	for _, cursor := range comments {
 		// check length
@@ -74,5 +74,4 @@ func (c *CommentCopyCatCheck) CheckComments(comments []*youtube.Comment) error {
 			}
 		}
 	}
-	return nil
 }
