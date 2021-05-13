@@ -1,4 +1,4 @@
-package copycat
+package common
 
 import (
 	"google.golang.org/api/youtube/v3"
@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func commentBefore(a, b *youtube.Comment) bool {
+func CommentBefore(a, b *youtube.Comment) bool {
 	t1, err := time.Parse(time.RFC3339, a.Snippet.PublishedAt)
 	if err != nil {
 		return false
@@ -18,7 +18,7 @@ func commentBefore(a, b *youtube.Comment) bool {
 	return t1.Before(t2)
 }
 
-func trimBody(c *youtube.Comment) (res string) {
+func TrimBody(c *youtube.Comment) (res string) {
 	res = c.Snippet.TextOriginal
 
 	// lower case
@@ -31,10 +31,10 @@ func trimBody(c *youtube.Comment) (res string) {
 	return
 }
 
-func getMatchingComments(orig *youtube.Comment, all map[string]*youtube.Comment) (matches []*youtube.Comment) {
-	bodyA := trimBody(orig)
+func GetMatchingComments(orig *youtube.Comment, all []*youtube.Comment) (matches []*youtube.Comment) {
+	bodyA := TrimBody(orig)
 	for _, a := range all {
-		bodyB := trimBody(a)
+		bodyB := TrimBody(a)
 		if bodyA == bodyB {
 			matches = append(matches, a)
 		}
@@ -43,7 +43,7 @@ func getMatchingComments(orig *youtube.Comment, all map[string]*youtube.Comment)
 	return
 }
 
-func commentFromHimHimself(a, b *youtube.Comment) bool {
+func CommentFromHimHimself(a, b *youtube.Comment) bool {
 	if a.Snippet == nil || b.Snippet == nil {
 		return false
 	}

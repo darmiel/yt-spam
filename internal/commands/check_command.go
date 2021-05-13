@@ -3,9 +3,9 @@ package commands
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	blacklist_checks "github.com/darmiel/yt-spam/internal/checks/blacklist-checks"
+	blacklist_checks "github.com/darmiel/yt-spam/internal/checks/blchecks"
 	"github.com/darmiel/yt-spam/internal/checks/copycat"
-	fmt_spam "github.com/darmiel/yt-spam/internal/checks/fmt-spam"
+	fmt_spam "github.com/darmiel/yt-spam/internal/checks/fmtspam"
 	"github.com/darmiel/yt-spam/internal/ytspam"
 	"github.com/muesli/termenv"
 	"github.com/pkg/errors"
